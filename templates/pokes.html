@@ -1,0 +1,14 @@
+{% extends 'setup.html' %}
+{% block body %}
+
+<div class="row" style="width: 300px">
+  <div class="col-4">
+    <div class="list-group" id="list-tab" role="tablist">
+      {% for poke in pokes %}
+        <a class="list-group-item list-group-item-action" id="list-home-list" data-toggle="list" href="#list-home" role="tab" aria-controls="home"><img src="https://play.pokemonshowdown.com/sprites/xyani/{{poke[0].lower()}}.gif">{{poke[0]}}</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

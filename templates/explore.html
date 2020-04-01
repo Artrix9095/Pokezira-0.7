@@ -1,0 +1,44 @@
+{% extends 'setup.html' %}
+<style>
+  div.chat {
+    right: 100px
+  }
+</style>
+{% block body %}
+  {% if pos.New %}
+    <h3>
+      <center>Welcome to PokeZira. Please pick your starter Pokemon!</center>
+    </h3>
+    <center>
+      <div style="height:300px; width:600px; overflow-y:scroll;border: 1.5px solid #DEDEDE;background-color: #FFF; border-top: 1px dotted #E4E4E4;">
+        <table width="100%">
+          <tbody>
+            <ul class="list-group">
+              {% for x in starters %}
+                <center>
+                  <li class="list-group-item disabled">
+                    <img src="https://play.pokemonshowdown.com/sprites/xyani/{{x.lower()}}.gif">
+                    <br><br>
+                    <button class="btn btn-success" onclick="window.location= '/adventure?starter={{x}}'">{{x}}</button>
+                  </li>
+                </center>
+              {% endfor %}
+            </ul>
+          </tbody>
+        </table>
+      </div>
+    </center>
+  {% else %}
+    <div id="chat">
+      <iframe src="https://chat.artrix.repl.co/?username={{session.username}}" width="350" height="500"></iframe>
+    </div>
+    <!-- Game Coding -->
+
+    <game id="mws-explore-area">
+      <canvas id="cvsGame" width="539" height="450" style="height: 450px;"></canvas>
+    </game>
+
+
+  {% endif %}
+{% endblock %}
+<script src="/static/explore.js"></script>

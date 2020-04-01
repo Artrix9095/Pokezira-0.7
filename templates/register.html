@@ -1,0 +1,24 @@
+ {% extends 'setup.html' %}
+
+{% block body %}
+  <h1>Sign Up!</h1>
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form action="" method="post">
+    <div class="form-group">
+      {{render_field(form.username, class_="form-control")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.email, class_="form-control")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.password, class_="form-control")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.confirm, class_="form-control")}}
+    </div>
+    <div class="form-group" style="height:170px; overflow-y:scroll;border: 1.5px solid #DEDEDE;background-color: #FFF; border-top: 1px dotted #E4E4E4;">
+      
+    </div>
+    <p><input type="submit" class="btn btn-primary"></input></p>
+  </form>
+{% endblock %}

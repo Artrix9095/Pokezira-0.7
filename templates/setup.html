@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-site-verification" content="Y3LDyhVXfMokqYBEeuvEgFWgAGIJBheoNaWT85nkNHU" />
+    <meta name="theme-color" content="#ff7300">
+    <meta name="description" content="Pokezira is beta pokemon game Developed by Artrix">
+    <meta name="author" content="Artrix">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" type="image/png" href="https://cdn2.iconfinder.com/data/icons/pokemon-flaticons/64/pokeball-people-pokemon-nintendo-video-game-gaming-gartoon-ball-512.png">
+    <title>PokeZira - {{name}}!</title>
+<link rel="stylesheet" type="text/css" href="/static/setup.css">
+
+<!--ok dont forget theres a chat-->
+</head>
+<body>
+    {% include '/includes/_navbar.html' %}
+    {% include '/includes/_messages.html' %}
+    {% block body %}
+      <input type="button" class="btn" name="Light theme"></input>
+    {% endblock %}
+</body>
+<div id="scripts">
+  {% block div %}
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/strikingforce909/pokezira/master/main.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  {% endblock %}
+</div>
+</html>

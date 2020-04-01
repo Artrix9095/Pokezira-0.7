@@ -1,0 +1,8 @@
+pokebase
+celery
+pusher
+wtforms
+passlib
+flask
+flask_socketio
+eventlet
