@@ -110,17 +110,17 @@ def damageCalc(attack, defense, level, movePower, stab, param, targets, weather=
   mods = targets*conditions()*crit()*ran()*stab*weakness(param['moveType'], param['defenseType'])
 
 
-  damage = floor(
+  """=damage = floor(
     (((((2 * level / 5)+2) 
     * movePower * attack/defense)/50)+2)*mods
   )
-  return damage
+  return damage"""
 
 
 
 #attack, defense, level, movePower, stab, param, targets, weather=None
 
-print(damageCalc(
+"""print(damageCalc(
   317,
   207,
   100,
@@ -138,3 +138,4 @@ print(damageCalc(
 ))
 
 
+"""

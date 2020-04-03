@@ -1,4 +1,4 @@
-
+from forum import Forum
 
 import battle
 #Imports
@@ -139,7 +139,7 @@ def addmon():
 
 
 bot = Flask(__name__)
-
+Forum = Forum(bot)
 trade.init(bot)
 
 print(os.listdir('/home/runner/Pokezira/templates/static/'))
@@ -371,6 +371,33 @@ def run():
     bot.secret_key = secret_key.strip()
     socketio.run(bot, debug=True, host="0.0.0.0")
 
+
+
+def run2():
+  funcs = []
+  for func in dir(Forum):
+    if not func.startswith("_"):
+      if func.startswith("func"):
+        funcs.append(func)
+      else:
+        pass 
+    else:
+      pass
+  print(funcs)
+  for exe in funcs:
+    exec("""
+Forum.{func}()
+    """.format(func=exe))
+
+
+
+
+
+
+
+T = Thread(target=run2).start()
+
+#------------------------forum------------------------#
 
 if True:
   run()
