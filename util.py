@@ -3,32 +3,38 @@ import sqlite3 as sql
 import requests
 
 
+natures = [{"name":"Adamant","hp":1,"atk":1.1,"def":1,"spa":0.9,"spd":1,"spe":1,"summary":"+Atk, -SpA","genfamily":["RS","DP","BW","XY"]},{"name":"Bashful","hp":1,"atk":1,"def":1,"spa":1,"spd":1,"spe":1,"summary":"","genfamily":["RS","DP","BW","XY"]},{"name":"Bold","hp":1,"atk":0.9,"def":1.1,"spa":1,"spd":1,"spe":1,"summary":"+Def, -Atk","genfamily":["RS","DP","BW","XY"]},{"name":"Brave","hp":1,"atk":1.1,"def":1,"spa":1,"spd":1,"spe":0.9,"summary":"+Atk, -Spe","genfamily":["RS","DP","BW","XY"]},{"name":"Calm","hp":1,"atk":0.9,"def":1,"spa":1,"spd":1.1,"spe":1,"summary":"+SpD, -Atk","genfamily":["RS","DP","BW","XY"]},{"name":"Careful","hp":1,"atk":1,"def":1,"spa":0.9,"spd":1.1,"spe":1,"summary":"+SpD, -SpA","genfamily":["RS","DP","BW","XY"]},{"name":"Docile","hp":1,"atk":1,"def":1,"spa":1,"spd":1,"spe":1,"summary":"","genfamily":["RS","DP","BW","XY"]},{"name":"Gentle","hp":1,"atk":1,"def":0.9,"spa":1,"spd":1.1,"spe":1,"summary":"+SpD, -Def","genfamily":["RS","DP","BW","XY"]},{"name":"Hardy","hp":1,"atk":1,"def":1,"spa":1,"spd":1,"spe":1,"summary":"","genfamily":["RS","DP","BW","XY"]},{"name":"Hasty","hp":1,"atk":1,"def":0.9,"spa":1,"spd":1,"spe":1.1,"summary":"+Spe, -Def","genfamily":["RS","DP","BW","XY"]},{"name":"Impish","hp":1,"atk":1,"def":1.1,"spa":0.9,"spd":1,"spe":1,"summary":"+Def, -SpA","genfamily":["RS","DP","BW","XY"]},{"name":"Jolly","hp":1,"atk":1,"def":1,"spa":0.9,"spd":1,"spe":1.1,"summary":"+Spe, -SpA","genfamily":["RS","DP","BW","XY"]},{"name":"Lax","hp":1,"atk":1,"def":1.1,"spa":1,"spd":0.9,"spe":1,"summary":"+Def, -SpD","genfamily":["RS","DP","BW","XY"]},{"name":"Lonely","hp":1,"atk":1.1,"def":0.9,"spa":1,"spd":1,"spe":1,"summary":"+Atk, -Def","genfamily":["RS","DP","BW","XY"]},{"name":"Mild","hp":1,"atk":1,"def":0.9,"spa":1.1,"spd":1,"spe":1,"summary":"+SpA, -Def","genfamily":["RS","DP","BW","XY"]},{"name":"Modest","hp":1,"atk":0.9,"def":1,"spa":1.1,"spd":1,"spe":1,"summary":"+SpA, -Atk","genfamily":["RS","DP","BW","XY"]},{"name":"Naive","hp":1,"atk":1,"def":1,"spa":1,"spd":0.9,"spe":1.1,"summary":"+Spe, -SpD","genfamily":["RS","DP","BW","XY"]},{"name":"Naughty","hp":1,"atk":1.1,"def":1,"spa":1,"spd":0.9,"spe":1,"summary":"+Atk, -SpD","genfamily":["RS","DP","BW","XY"]},{"name":"Quiet","hp":1,"atk":1,"def":1,"spa":1.1,"spd":1,"spe":0.9,"summary":"+SpA, -Spe","genfamily":["RS","DP","BW","XY"]},{"name":"Quirky","hp":1,"atk":1,"def":1,"spa":1,"spd":1,"spe":1,"summary":"","genfamily":["RS","DP","BW","XY"]},{"name":"Rash","hp":1,"atk":1,"def":1,"spa":1.1,"spd":0.9,"spe":1,"summary":"+SpA, -SpD","genfamily":["RS","DP","BW","XY"]},{"name":"Relaxed","hp":1,"atk":1,"def":1.1,"spa":1,"spd":1,"spe":0.9,"summary":"+Def, -Spe","genfamily":["RS","DP","BW","XY"]},{"name":"Sassy","hp":1,"atk":1,"def":1,"spa":1,"spd":1.1,"spe":0.9,"summary":"+SpD, -Spe","genfamily":["RS","DP","BW","XY"]},{"name":"Serious","hp":1,"atk":1,"def":1,"spa":1,"spd":1,"spe":1,"summary":"","genfamily":["RS","DP","BW","XY"]},{"name":"Timid","hp":1,"atk":0.9,"def":1,"spa":1,"spd":1,"spe":1.1,"summary":"+Spe, -Atk","genfamily":["RS","DP","BW","XY"]}]
+
+
 class other(object):
   """Other useful functions to keep main.py smaller"""
+
+
+  def newConn():
+    """Saves a few button presses by opening a database and returning the output as a dict"""
+    g = sql.connect('user.db')
+    e = g.cursor()
+    return {
+      "close": g.close,
+      "commit": g.commit,
+      "cursor": e
+    }
+
+
   def reqJSON(url):
     return requests.get(url).json()
+
+
   def checkDB(table):
-    g = newConn()
+    g = other.newConn()
     c = g['cursor']
     c.execute('SELECT * FROM {s}'.format(s=table))
     return c.fetchall()
 
-def success(a):
-  """Success function to verify the script was successful"""
-  print(f'\n\n{a} successfully completed its mission\n\n')
-  return f'{a} successfully completed its mission'
-
-
-def newConn():
-  """Saves a few button presses by opening a database and returning the output as a dict"""
-  g = sql.connect('user.db')
-  e = g.cursor()
-  return {
-    "close": g.close,
-    "commit": g.commit,
-    "cursor": e
-  }
-
+  def success(a):
+    """Success function to verify the script was successful"""
+    print(f'\n\n{a} successfully completed its mission\n\n')
+    return f'{a} successfully completed its mission'
 
 
   def ivgen(pokeId):
@@ -64,41 +70,16 @@ def newConn():
     return other.success('ivgen')
 
 
+  def naturegen():
+    c = []
+    for nature in natures:
+      c.append(nature['name'])
+    return random.choice(c)
+
+
+
 
 class pokeManage(object):
-  def ivgen(pokeId):
-    """Generates a fresh new iV set and inserts it into the database"""
-    h = newConn()
-    close = h['close']
-    commit = h['commit']
-    c = h['cursor']
-    c.execute("""
-      INSERT INTO pokeiv
-      (ID,
-      HPiv,
-      Atkiv,
-      Defiv,
-      SpAtkiv,
-      SpDefiv,
-      Speediv)
-      VALUES(?,?,?,?,?,?,?)
-    """, (
-
-        pokeId,
-        random.randint(0,31),
-        random.randint(0,31),
-        random.randint(0,31),
-        random.randint(0,31),
-        random.randint(0,31),
-        random.randint(0,31)
-
-    ))
-
-    commit()
-    close()
-    return success('ivgen')
-
-
   def validMoves(pokeId, Lvl):
     payload = other.reqJSON("https://pokeapi.co/api/v2/pokemon/"+str(pokeId))
     valid = []
@@ -113,15 +94,14 @@ class pokeManage(object):
         else:
           pass
     return valid
+  
 
 
-  """def statsCalc(ev, iv, pokeId):
+
+  def statsCalc(ev, iv, pokeId, nat, stat, lvl):
     import math
-    payload = other.reqJSON("https://pokeapi.co/api/v2/pokemon/"+str(pokeId))
-    for in payload['stats']:
-
-    #math.floor(math.floor((((iv + (2 * base[stat]) + (ev / 4) + 100) * lvl) / 100) + 10) * nat)
-    """
+    payload = (other.reqJSON("https://pokeapi.co/api/v2/pokemon/"+str(pokeId)))['stats']
+    math.floor(math.floor((((iv + (2 * payload[stat]) + (ev / 4) + 100) * lvl) / 100) + 10) * nat)
       
 
 

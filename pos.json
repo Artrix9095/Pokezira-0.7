@@ -196,5 +196,14 @@
         "Region": "Organon",
         "Town": "Tremum Town",
         "New": false
+    },
+    "Cbmm30ghI": {
+        "X": 0,
+        "Y": 0,
+        "Quests": [],
+        "Badges": [],
+        "Region": "Organon",
+        "Town": "Tremum Town",
+        "New": false
     }
 }

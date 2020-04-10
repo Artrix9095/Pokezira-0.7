@@ -1,5 +1,11 @@
 from forum import Forum
 
+
+from multiprocessing import Process
+
+
+from bot import run as _run
+
 import battle
 #Imports
 
@@ -30,7 +36,7 @@ import sqlite3
 # Sqlite Database for user data (faster database but takes more work to use)
 
 import random as rand
-# Random for random choices used for strgen, idgen() and ivgen()
+# Random for random choices used for strgen(), idgen() and ivgen()
 
 import json
 # Easier to use database but slow and is likely to break if it gets too big
@@ -189,7 +195,7 @@ def idgen():
                 letter = rand.choice(lower)
             cur += str(letter)
         else:
-            chars = """`~!@#$%^&*()-=_+[]\{}|;':",./ <>?"""
+            chars = """`~!@#$%^&*()-=_+[]\{};:",./ <>?"""
             chars=list(chars)
             tester = rand.choice(chars)
             cur += str(tester)
@@ -369,7 +375,7 @@ def update_pos(code):
 def run():
     secret_key = os.environ['SECRET_KEY']
     bot.secret_key = secret_key.strip()
-    socketio.run(bot, debug=True, host="0.0.0.0")
+    socketio.run(bot, host="0.0.0.0")
 
 
 
@@ -396,7 +402,7 @@ Forum.{func}()
 
 
 T = Thread(target=run2).start()
-
+B = Process(target=_run).start()
 #------------------------forum------------------------#
 
 if True:
