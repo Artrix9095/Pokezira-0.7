@@ -98,11 +98,34 @@ class pokeManage(object):
 
 
 
-  def statsCalc(ev, iv, pokeId, nat, stat, lvl):
-    import math
-    payload = (other.reqJSON("https://pokeapi.co/api/v2/pokemon/"+str(pokeId)))['stats']
-    math.floor(math.floor((((iv + (2 * payload[stat]) + (ev / 4) + 100) * lvl) / 100) + 10) * nat)
-      
+  def statsCalc(ev, iv, BaseStat, nat, stat, lvl):
+    import math as Math
+    def convert(s):
+      if s in ['hp','atk','def','spa','spd','spd']:
+        return s 
+      else:
+        conv = {
+          'HP': s.lower(),
+          'attack': 'atk',
+          'defense': 'def',
+          'special-attack': 'spa',
+          'special-defense': 'spd',
+          'speed': 'spe'
+        }
+        return conv[s]
+    base = BaseStat
+    _stat = convert(stat)
+    for x in natures:
+      if x['name'] == nat.capitalize():
+        nature = x
+      else:
+        pass
+    if not stat in ['hp', 'HP']:
+      statss = Math.floor(Math.floor((((iv + (2 * BaseStat) + (ev / 4)) * lvl) / 100) + 5) * nature[_stat])
+    else:
+      statss = Math.floor(Math.floor((((iv + (2 * BaseStat) + (ev / 4) + 100) * lvl) / 100) + 10) * nature[_stat])
+    return statss
+
 
 
 
