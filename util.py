@@ -70,11 +70,15 @@ class other(object):
     return other.success('ivgen')
 
 
-  def naturegen():
+  def naturegen(synch=False):
     c = []
     for nature in natures:
       c.append(nature['name'])
-    return random.choice(c)
+      l = random.choice(c)
+    if not synch:
+      return l
+    else:
+      random.choice((l, synch)) #synch is the actual nature
 
 
 
@@ -98,10 +102,10 @@ class pokeManage(object):
 
 
 
-  def statsCalc(ev, iv, BaseStat, nat, stat, lvl):
+  def statsCalc(ev, iv, BaseStat, nat, stat, lvl, pokeId):
     import math as Math
     def convert(s):
-      if s in ['hp','atk','def','spa','spd','spd']:
+      if s in ['hp','atk','def','spa','spd','spe']:
         return s 
       else:
         conv = {
@@ -110,10 +114,14 @@ class pokeManage(object):
           'defense': 'def',
           'special-attack': 'spa',
           'special-defense': 'spd',
-          'speed': 'spe'
+          'speed': 'spe',
+          'Atk': s.lower(),
+          'Def': s.lower(),
+          'SpAtk': 'spa',
+          'SpDef': 'spd',
+          'Speed': 'spe'
         }
         return conv[s]
-    base = BaseStat
     _stat = convert(stat)
     for x in natures:
       if x['name'] == nat.capitalize():
@@ -124,8 +132,109 @@ class pokeManage(object):
       statss = Math.floor(Math.floor((((iv + (2 * BaseStat) + (ev / 4)) * lvl) / 100) + 5) * nature[_stat])
     else:
       statss = Math.floor(Math.floor((((iv + (2 * BaseStat) + (ev / 4) + 100) * lvl) / 100) + 10) * nature[_stat])
-    return statss
+    h = other.newConn()
+    close = h['close']
+    commit = h['commit']
+    c = h['cursor']
+    del h
+    c.execute(f"""
+      INSERT INTO pokedata({_stat}) VALUES (
+        ?
+      )
+    """,(statss,))
+    commit()
+    close()
+    return other.success("statsCalc")
+    
 
+
+  def abilitygen(p):
+    payload = []
+    hidden = ""
+    g = other.reqJSON("https://pokeapi.co/api/v2/pokemon/"+p)["abilities"]
+    for x in g:
+      cur = x["ability"]
+      if x["is_hidden"]:
+        hidden = cur["name"]
+        payload.append(cur["name"])
+      else:
+        payload.append(cur["name"])
+    return [payload, hidden]
+    
+
+  def createPokemon(lvl, owner_id, pokemon, idgen, synch=False):
+    pokeId = owner_id+idgen()+idgen()
+    other.ivgen(pokeId)
+    h = other.newConn()
+    close = h['close']
+    commit = h['commit']
+    c = h['cursor']
+    del h
+    #     'Atk': s.lower(),
+    #     'Def': s.lower(),
+    #     'SpAtk': 'spa',
+    #     'SpDef': 'spd',
+    #     'Speed': 'spe'
+    conv = {
+          'HP': 'hp',
+          'Atk':'attack',
+          'Def': 'defense',
+          'SpAtk': 'special-attack',
+          'SpDef': 'special-defense',
+          'Speed': 'speed'
+        }
+    def getStat(payload, stat):
+      stat = conv[stat]
+      for o in payload:
+        if o['stat']['name'] == stat:
+          return { "base": o['base_stat'], "name": o['stat']['name'] }
+        else:
+          pass
+    for stat in ['HP','Atk','Def','SpAtk','SpDef','Speed']:
+      c.execute(f"SELECT {stat+'iv'} FROM pokeiv WHERE ID = ?",(pokeId,))
+      iv = c.fetchone()[0]
+      l = other.reqJSON("https://pokeapi.co/api/v2/pokemon/"+pokemon)['stats']
+      baseStat = getStat(l, stat)["base"]
+      pokeManage.statsCalc(0, iv, baseStat, other.naturegen(synch), stat, lvl, pokeId)
+    ability = pokeManage.abilitygen(pokemon)
+    o = ability
+    ability = random.choice(ability[0])
+    ability = random.choice((ability, pokeManage.abilitygen(pokemon)[1], random.choice(o[0]))).capitalize()
+    c.execute("""
+      INSERT INTO userpoke(
+        user_id,
+        pokemon,
+        mon_id
+      ) VALUES (
+        ?,?,?
+      )
+    """,(owner_id,pokemon,pokeId)) 
+    commit()
+    c.execute("""
+      INSERT INTO pokestats(
+        ID,
+        Nature,
+        Ability,
+        Level,
+        EXP,
+        Moves
+      ) VALUES (
+        ?,?,?,
+        ?,?,?
+      )
+    """,(pokeId, other.naturegen(synch), ability, lvl, int((50*50)/2)^(3)*int((lvl/2)), str(
+      [
+        "Tackle",
+        "Tackle",
+        "Tackle",
+        "Tackle"
+      ]
+    )))
+    commit()
+    close()
+    return other.success("createPokemon")
+
+    
 
 
 

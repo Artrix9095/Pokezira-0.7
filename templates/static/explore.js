@@ -1,1 +1,2 @@
-this.ctx = 
+
+this.game = document.getElementById('Game')

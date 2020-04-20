@@ -69,16 +69,9 @@ def strgen():
   return oof
     
 #Opens one of 2 databases this one is json(should be converted into sqlite when the game gets bigger since json files can break when they get too big)
-with open('pos.json', 'r') as f:
-    payload = json.load(f)
 
 
 
-def write():
-    """Writing to the json file that i mentioned above"""
-    with open('pos.json', 'w') as f:
-        print('Changes have been made to the storage')
-        json.dump(payload, f, indent=4)
 
 
 
@@ -97,16 +90,18 @@ def is_logged_in(f):
 
 
 
-def is_new(f):
+def is_new(userId):
     """Checks if a user is new to the game"""
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if payload[session["id"]]["New"]:
-            flash('Unauthorized Method', 'danger')
-            return redirect(url_for('/adventure'))
-        else:
-            return f(*args, **kwargs)
-    return wrap
+    h = u1.other.newConn()
+    c = h['cursor']
+    c.execute("SELECT new FROM user WHERE user_id = ?",(userId,))
+    p = c.fetchone()
+    if p == None:
+      return None
+    elif bool(p[0]) == True:
+      return True
+    else:
+      return False 
 
 
 
@@ -153,10 +148,30 @@ socketio = SocketIO(bot)
 
 
 
-
+@bot.route('/profile')
+def profile():
+  session.clear()
+  return 'hi'
+@bot.route('/cdn/sounds/music/<file>')
+def music(file):
+  return send_file(f'./sounds/music/{file}')
 @bot.route('/cdn/sprite/<folder>/<sprite>')
 def spritess(folder, sprite):
   return send_file('/home/runner/Pokezira/Pokezira sprites V1/'+folder+"/"+sprite, mimetype="image/png")
+@bot.route('/cdn/gif/pokemon/<pokemon>')
+def pokesprite(pos, pokemon, special):
+  if special == 'normal':
+    special = ""
+  return """
+      <html><head><meta name="viewport" content="width=device-width, minimum-scale=0.1"><title>bulbasaur.gif (45×49)</title></head><body style="margin: 0px; background: #0e0e0e;">
+
+
+      <img style="-webkit-user-select: none;margin: auto;" src="https://play.pokemonshowdown.com/sprites/xyani/bulbasaur.gif">
+
+
+      </body></html>
+    """
+
 
 #----------------------=-----------------#
 #----------------------=-----------------#
@@ -195,12 +210,13 @@ def idgen():
                 letter = rand.choice(lower)
             cur += str(letter)
         else:
-            chars = """`~!@#$%^&*()-=_+[]\{};:",./ <>?"""
+            chars = """`~!@#$%^*()-=_+[]\{};:",./<>"""
             chars=list(chars)
             tester = rand.choice(chars)
             cur += str(tester)
         run += 1
     return cur
+
 
 class RegisterForm(Form):
     """Form for the sign up"""
@@ -212,27 +228,33 @@ class RegisterForm(Form):
     ])
     confirm = PasswordField('Confirm Password')
 
+
 @bot.route('/uptime')
 def oof():
   """A cringe uptime system that keeps the website up and online 24/7"""
   return 'oof'
 
-for script in os.listdir('/home/runner/Pokezira/templates/static/'):
-  print(script)
-  exec(f"""
-@bot.route('/static/{script}')
-def {strgen()}():
-  return open("/home/runner/Pokezira/templates/static/{script}", 'r').read()""")
-  print('finished 1')
-os.system("systemctl enable ssh")
+
+@bot.route('/static/<f>')
+def static_files(f):
+  return send_file("/home/runner/Pokezira/templates/static/{}".format(f))
+
 
 @bot.route('/battle/<obj>')
 def __battle__(obj):
   return obj
+
+
+
 @bot.route('/')
 def index():
     return render_template('index.html', name='Home')
+
+
 @bot.route('/register', methods=['POST', 'GET'])
+
+
+
 def register():
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -244,28 +266,22 @@ def register():
         c = db.cursor()
         c.execute("SELECT username FROM user WHERE username = ?",(username,))
         if c.fetchone() == None:
-            c.execute("INSERT INTO user(user_id, email, username, password) VALUES(?,?,?,?)", (id, email, username, password))
+            c.execute("INSERT INTO user(user_id, email, username, password, new) VALUES(?,?,?,?,?)", (id, email, username, password, True))
             db.commit()
             flash('You Signed Up!', 'success')
-            print(payload)
-            payload[id] = {
-                'X':0,
-                'Y':0,
-                'Quests': [],
-                'Badges': [],
-                'Region': 'Organon',
-                'Town': 'Tremum Town',
-                'New': True
-            }
-            write()
+            c.execute("INSERT INTO userdata(user_id, Coins, Location, Sprite, X,Y) VALUES(?,?,?,?,?,?)",(id, 1000, '{"Town": "Town_of_Beginning", "Region": 0}', 'NormalredAsh', 0, 0))
+            db.commit()
+            db.close()
         else:
             flash('There is already a user with that username! Please pick another.', 'danger')
         return redirect(url_for('register'))
         db.close()
     return render_template('register.html', name='Sign Up', form=form)
+
+
 @bot.route('/login', methods=['GET', 'POST'])
 def login():
-    print(payload)
+
     if request.method == "POST":
         username = request.form['username']
         passw = request.form['password']
@@ -282,6 +298,7 @@ def login():
                 session['access'] = True
                 session['id'] = data[0]
                 session['username'] = username
+
                 flash("You've Logged In!", 'success')
                 session["secret"] = crypt.encrypt(str(data[0])).replace('/', '')
                 return redirect('adventure')
@@ -293,8 +310,10 @@ def login():
 @bot.route('/logout')
 @is_logged_in
 def logout():
-    session.clear()
-    return redirect('/login')
+  session.clear()
+  return redirect('/login')
+
+
 @bot.route('/pokemon')
 @is_logged_in 
 def poke():
@@ -304,16 +323,13 @@ def poke():
   pkmn = list(c.fetchall())
   return render_template('pokes.html', pokes=pkmn, name="Your Pokemon")
 
+
+
 @bot.route('/adventure', methods=["GET","POST"])
 @is_logged_in
 def main():
   if not 'starter' in str(request.url):
-    return render_template(
-        'explore.html',
-        name="Adventure",
-        pos=payload[session["id"]],
-        write=write,
-        starters=[
+    starters = [
           "Bulbasaur",
           "Charmander",
           "Squirtle",
@@ -336,46 +352,68 @@ def main():
           "Litten",
           "Popplio"
         ]
+    if session['username'] in ['Maryjane123', 'Artrix']:
+      starters = [
+          "Bulbasaur",
+          "Charmander",
+          "Squirtle",
+          "Chikorita",
+          "Cyndaquil",
+          "Totodile",
+          "Treecko",
+          "Torchic",
+          "Mudkip",
+          "Turtwig",
+          "Chimchar",
+          "Piplup",
+          "Snivy",
+          "Tepig",
+          "Oshawott",
+          "Chespin",
+          "Fennekin",
+          "Froakie",
+          "Rowlet",
+          "Litten",
+          "Popplio",
+          'Palkia',
+          'Lugia',
+          'Yveltal',
+          'Dialga',
+          'Zygarde'
+        ]
+    new = is_new(session['id'])
+    print(new)
+    return render_template(
+        'explore.html',
+        name="Adventure",
+        starters=starters,
+        new=new
     )
   else:
-    if not payload[session["id"]]["New"]:
+    if is_new(session['id']) == False:
       flash('Unauthorized method', 'danger')
       return redirect('/adventure')
+    u1.pokeManage.createPokemon(
+      5, session['id'], request.args.get("starter").lower(), idgen
+    )
     db = sqlite3.connect('user.db')
     c = db.cursor()
-    c.execute("INSERT INTO userpoke(user_id, pokemon, mon_id) VALUES(?,?,?)",(session["id"], str(request.args.get('starter')), session["id"]+str(idgen())))
+    c.execute("UPDATE user SET new = ? WHERE user_id = ?",(False, session['id']))
     db.commit()
-    db.close()
     flash('You have passed the test! You may continue your journey trainer.', 'success')
-    payload[session["id"]]["New"] = False
-    write()
+    db.close()
     return redirect('/adventure')
 def get_sprites():
-    db = sqlite3.connect('db/user.db')
+    db = sqlite3.connect('user.db')
     c = db.cursor()
     c.execute("SELECT Name from pokemon")
     m = c.fetchall()
     return m
-@bot.route("/db/pos/<code>")
-@is_logged_in
-def update_pos(code):
-  print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ninfo = {}".format(request.args.get('Y')))
-  if crypt.verify(code, session['secret']):
-    payload[session['id']]['X'] = request.args.get('X')
-    payload[session['id']]['Y'] = request.args.get('Y')
-    write()
-    return "new x & y is: X={}, Y={}".format(payload[session['id']]
-    ['X'], payload[session['id']]['Y'])
-  else:
-    payload[session['id']]['X'] = int( request.args.get('X'))
-    payload[session['id']]['Y'] = int(request.args.get('Y'))
-    write()
-    return "new x & y is: X={}, Y={}".format(payload[session['id']]
-    ['X'], payload[session['id']]['Y'])
+
 def run():
     secret_key = os.environ['SECRET_KEY']
     bot.secret_key = secret_key.strip()
-    socketio.run(bot, host="0.0.0.0")
+    socketio.run(bot, debug=True, host="0.0.0.0")
 
 
 
@@ -402,7 +440,7 @@ Forum.{func}()
 
 
 T = Thread(target=run2).start()
-B = Process(target=_run).start()
+#B = Process(target=_run).start()
 #------------------------forum------------------------#
 
 if True:
